@@ -26,7 +26,7 @@ import (
 	gatewayxv1a1 "sigs.k8s.io/gateway-api/apisx/v1alpha1"
 	"sigs.k8s.io/gateway-api/conformance/utils/http"
 	"sigs.k8s.io/gateway-api/conformance/utils/kubernetes"
-	"sigs.k8s.io/gateway-api/conformance/utils/suite"
+	suitepkg "sigs.k8s.io/gateway-api/conformance/utils/suite"
 	"sigs.k8s.io/gateway-api/pkg/features"
 )
 
@@ -34,7 +34,7 @@ func init() {
 	ConformanceTests = append(ConformanceTests, ListenerSetHostnameConflict)
 }
 
-var ListenerSetHostnameConflict = suite.ConformanceTest{
+var ListenerSetHostnameConflict = suitepkg.ConformanceTest{
 	ShortName:   "ListenerSetHostnameConflict",
 	Description: "Listener Set listener with hostname conflicts to validate Listener Precedence",
 	Features: []features.FeatureName{
@@ -45,8 +45,8 @@ var ListenerSetHostnameConflict = suite.ConformanceTest{
 	Manifests: []string{
 		"tests/listenerset-hostname-conflict.yaml",
 	},
-	Test: func(t *testing.T, suite *suite.ConformanceTestSuite) {
-		ns := "gateway-conformance-infra"
+	Test: func(t *testing.T, suite *suitepkg.ConformanceTestSuite) {
+		ns := suitepkg.InfrastructureNamespace
 
 		kubernetes.NamespacesMustBeReady(t, suite.Client, suite.TimeoutConfig, []string{ns})
 

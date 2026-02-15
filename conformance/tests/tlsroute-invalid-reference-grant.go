@@ -24,7 +24,7 @@ import (
 
 	"sigs.k8s.io/gateway-api/apis/v1beta1"
 	"sigs.k8s.io/gateway-api/conformance/utils/kubernetes"
-	"sigs.k8s.io/gateway-api/conformance/utils/suite"
+	suitepkg "sigs.k8s.io/gateway-api/conformance/utils/suite"
 	"sigs.k8s.io/gateway-api/pkg/features"
 )
 
@@ -32,7 +32,7 @@ func init() {
 	ConformanceTests = append(ConformanceTests, TLSRouteInvalidReferenceGrant)
 }
 
-var TLSRouteInvalidReferenceGrant = suite.ConformanceTest{
+var TLSRouteInvalidReferenceGrant = suitepkg.ConformanceTest{
 	ShortName:   "TLSRouteInvalidReferenceGrant",
 	Description: "A single TLSRoute in the gateway-conformance-infra namespace, with a backendRef in another namespace without valid ReferenceGrant, should have the ResolvedRefs condition set to False",
 	Features: []features.FeatureName{
@@ -41,9 +41,9 @@ var TLSRouteInvalidReferenceGrant = suite.ConformanceTest{
 		features.SupportReferenceGrant,
 	},
 	Manifests: []string{"tests/tlsroute-invalid-reference-grant.yaml"},
-	Test: func(t *testing.T, suite *suite.ConformanceTestSuite) {
-		routeNN := types.NamespacedName{Name: "gateway-conformance-infra-test", Namespace: "gateway-conformance-infra"}
-		gwNN := types.NamespacedName{Name: "gateway-tlsroute-referencegrant", Namespace: "gateway-conformance-infra"}
+	Test: func(t *testing.T, suite *suitepkg.ConformanceTestSuite) {
+		routeNN := types.NamespacedName{Name: suitepkg.InfrastructureGatewayName, Namespace: suitepkg.InfrastructureNamespace}
+		gwNN := types.NamespacedName{Name: "gateway-tlsroute-referencegrant", Namespace: suitepkg.InfrastructureNamespace}
 
 		kubernetes.GatewayAndTLSRoutesMustBeAccepted(t, suite.Client, suite.TimeoutConfig, suite.ControllerName, kubernetes.NewGatewayRef(gwNN), routeNN)
 

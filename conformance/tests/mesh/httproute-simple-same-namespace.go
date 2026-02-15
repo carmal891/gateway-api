@@ -31,14 +31,14 @@ func init() {
 
 var MeshHTTPRouteSimpleSameNamespace = suite.ConformanceTest{
 	ShortName:   "MeshHTTPRouteSimpleSameNamespace",
-	Description: "A single HTTPRoute in the gateway-conformance-mesh namespace attaches to a Service in the same namespace",
+	Description: "A single HTTPRoute in the " + suite.MeshNamespace + " namespace attaches to a Service in the same namespace",
 	Features: []features.FeatureName{
 		features.SupportMesh,
 		features.SupportHTTPRoute,
 	},
 	Manifests: []string{"tests/mesh/httproute-simple-same-namespace.yaml"},
 	Test: func(t *testing.T, s *suite.ConformanceTestSuite) {
-		ns := "gateway-conformance-mesh"
+		ns := suite.MeshNamespace
 		client := echo.ConnectToApp(t, s, echo.MeshAppEchoV1)
 		t.Run("Simple HTTP request should reach infra-backend", func(t *testing.T) {
 			client.MakeRequestAndExpectEventuallyConsistentResponse(t, http.ExpectedResponse{

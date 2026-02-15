@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"sigs.k8s.io/gateway-api/conformance/utils/kubernetes"
-	"sigs.k8s.io/gateway-api/conformance/utils/suite"
+	suitepkg "sigs.k8s.io/gateway-api/conformance/utils/suite"
 	"sigs.k8s.io/gateway-api/conformance/utils/tcp"
 	"sigs.k8s.io/gateway-api/pkg/features"
 )
@@ -36,7 +36,7 @@ func init() {
 	ConformanceTests = append(ConformanceTests, TLSRouteSimpleSameNamespace)
 }
 
-var TLSRouteSimpleSameNamespace = suite.ConformanceTest{
+var TLSRouteSimpleSameNamespace = suitepkg.ConformanceTest{
 	ShortName:   "TLSRouteSimpleSameNamespace",
 	Description: "A single TLSRoute in the gateway-conformance-infra namespace attaches to a Gateway in the same namespace",
 	Features: []features.FeatureName{
@@ -44,9 +44,9 @@ var TLSRouteSimpleSameNamespace = suite.ConformanceTest{
 		features.SupportTLSRoute,
 	},
 	Manifests: []string{"tests/tlsroute-simple-same-namespace.yaml"},
-	Test: func(t *testing.T, suite *suite.ConformanceTestSuite) {
-		ns := "gateway-conformance-infra"
-		routeNN := types.NamespacedName{Name: "gateway-conformance-infra-test", Namespace: ns}
+	Test: func(t *testing.T, suite *suitepkg.ConformanceTestSuite) {
+		ns := suitepkg.InfrastructureNamespace
+		routeNN := types.NamespacedName{Name: suitepkg.InfrastructureGatewayName, Namespace: ns}
 		gwNN := types.NamespacedName{Name: "gateway-tlsroute", Namespace: ns}
 		certNN := types.NamespacedName{Name: "tls-passthrough-checks-certificate", Namespace: ns}
 
@@ -67,7 +67,7 @@ var TLSRouteSimpleSameNamespace = suite.ConformanceTest{
 				tcp.ExpectedResponse{
 					BackendIsTLS: true, // Passthrough expects a TLS Backend
 					Backend:      "tcp-backend",
-					Namespace:    "gateway-conformance-infra",
+					Namespace:    suitepkg.InfrastructureNamespace,
 					Hostname:     serverStr,
 				})
 		})

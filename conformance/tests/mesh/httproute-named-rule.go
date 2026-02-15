@@ -21,7 +21,7 @@ import (
 
 	"sigs.k8s.io/gateway-api/conformance/utils/echo"
 	"sigs.k8s.io/gateway-api/conformance/utils/http"
-	"sigs.k8s.io/gateway-api/conformance/utils/suite"
+	suitepkg "sigs.k8s.io/gateway-api/conformance/utils/suite"
 	"sigs.k8s.io/gateway-api/pkg/features"
 )
 
@@ -29,7 +29,7 @@ func init() {
 	MeshConformanceTests = append(MeshConformanceTests, MeshHTTPRouteNamedRule)
 }
 
-var MeshHTTPRouteNamedRule = suite.ConformanceTest{
+var MeshHTTPRouteNamedRule = suitepkg.ConformanceTest{
 	ShortName:   "MeshHTTPRouteNamedRule",
 	Description: "An HTTPRoute with a named HTTPRouteRule",
 	Manifests:   []string{"tests/mesh/httproute-named-rule.yaml"},
@@ -39,8 +39,8 @@ var MeshHTTPRouteNamedRule = suite.ConformanceTest{
 		features.SupportMeshHTTPRouteNamedRouteRule,
 	},
 	Provisional: true,
-	Test: func(t *testing.T, suite *suite.ConformanceTestSuite) {
-		ns := "gateway-conformance-mesh"
+	Test: func(t *testing.T, suite *suitepkg.ConformanceTestSuite) {
+		ns := suitepkg.MeshNamespace
 		client := echo.ConnectToApp(t, suite, echo.MeshAppEchoV1)
 
 		testCases := []http.ExpectedResponse{

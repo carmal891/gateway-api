@@ -24,7 +24,7 @@ import (
 
 	v1 "sigs.k8s.io/gateway-api/apis/v1"
 	"sigs.k8s.io/gateway-api/conformance/utils/kubernetes"
-	"sigs.k8s.io/gateway-api/conformance/utils/suite"
+	suitepkg "sigs.k8s.io/gateway-api/conformance/utils/suite"
 	"sigs.k8s.io/gateway-api/pkg/features"
 )
 
@@ -32,7 +32,7 @@ func init() {
 	ConformanceTests = append(ConformanceTests, TLSRouteInvalidNoMatchingListener)
 }
 
-var TLSRouteInvalidNoMatchingListener = suite.ConformanceTest{
+var TLSRouteInvalidNoMatchingListener = suitepkg.ConformanceTest{
 	ShortName:   "TLSRouteInvalidNoMatchingListener",
 	Description: "A TLSRoute should set Accepted=False when attaching to a Gateway with no compatible TLS listener",
 	Features: []features.FeatureName{
@@ -40,8 +40,8 @@ var TLSRouteInvalidNoMatchingListener = suite.ConformanceTest{
 		features.SupportTLSRoute,
 	},
 	Manifests: []string{"tests/tlsroute-invalid-no-matching-listener.yaml"},
-	Test: func(t *testing.T, suite *suite.ConformanceTestSuite) {
-		ns := "gateway-conformance-infra"
+	Test: func(t *testing.T, suite *suitepkg.ConformanceTestSuite) {
+		ns := suitepkg.InfrastructureNamespace
 
 		routeNotAllowedProtocolHTTPNN := types.NamespacedName{Name: "tlsroute-not-allowed-protocol-http", Namespace: ns}
 		routeNotAllowedKindNN := types.NamespacedName{Name: "tlsroute-not-allowed-kind", Namespace: ns}

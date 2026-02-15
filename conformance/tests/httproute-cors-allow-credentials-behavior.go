@@ -40,12 +40,12 @@ var HTTPRouteCORSAllowCredentialsBehavior = suite.ConformanceTest{
 		features.SupportHTTPRoute,
 		features.SupportHTTPRouteCORS,
 	},
-	Test: func(t *testing.T, suite *suite.ConformanceTestSuite) {
-		ns := "gateway-conformance-infra"
+	Test: func(t *testing.T, cts *suite.ConformanceTestSuite) {
+		ns := suite.InfrastructureNamespace
 		routeNN := types.NamespacedName{Name: "cors-allow-credentials", Namespace: ns}
 		gwNN := types.NamespacedName{Name: "same-namespace", Namespace: ns}
-		gwAddr := kubernetes.GatewayAndHTTPRoutesMustBeAccepted(t, suite.Client, suite.TimeoutConfig, suite.ControllerName, kubernetes.NewGatewayRef(gwNN), routeNN)
-		kubernetes.HTTPRouteMustHaveResolvedRefsConditionsTrue(t, suite.Client, suite.TimeoutConfig, routeNN, gwNN)
+		gwAddr := kubernetes.GatewayAndHTTPRoutesMustBeAccepted(t, cts.Client, cts.TimeoutConfig, cts.ControllerName, kubernetes.NewGatewayRef(gwNN), routeNN)
+		kubernetes.HTTPRouteMustHaveResolvedRefsConditionsTrue(t, cts.Client, cts.TimeoutConfig, routeNN, gwNN)
 
 		origin := "https://app.example"
 
@@ -109,7 +109,7 @@ var HTTPRouteCORSAllowCredentialsBehavior = suite.ConformanceTest{
 			tc := testCases[i]
 			t.Run(tc.GetTestCaseName(i), func(t *testing.T) {
 				t.Parallel()
-				http.MakeRequestAndExpectEventuallyConsistentResponse(t, suite.RoundTripper, suite.TimeoutConfig, gwAddr, tc)
+				http.MakeRequestAndExpectEventuallyConsistentResponse(t, cts.RoundTripper, cts.TimeoutConfig, gwAddr, tc)
 			})
 		}
 	},

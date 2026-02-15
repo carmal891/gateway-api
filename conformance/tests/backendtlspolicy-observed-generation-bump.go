@@ -29,7 +29,7 @@ import (
 
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 	"sigs.k8s.io/gateway-api/conformance/utils/kubernetes"
-	"sigs.k8s.io/gateway-api/conformance/utils/suite"
+	suitepkg "sigs.k8s.io/gateway-api/conformance/utils/suite"
 	"sigs.k8s.io/gateway-api/pkg/features"
 )
 
@@ -37,17 +37,17 @@ func init() {
 	ConformanceTests = append(ConformanceTests, BackendTLSPolicyObservedGenerationBump)
 }
 
-var BackendTLSPolicyObservedGenerationBump = suite.ConformanceTest{
+var BackendTLSPolicyObservedGenerationBump = suitepkg.ConformanceTest{
 	ShortName:   "BackendTLSPolicyObservedGenerationBump",
-	Description: "A BackendTLSPolicy in the gateway-conformance-infra namespace should update the observedGeneration in all of its Status.Conditions after an update to the spec",
+	Description: "A BackendTLSPolicy in the " + suitepkg.InfrastructureNamespace + " namespace should update the observedGeneration in all of its Status.Conditions after an update to the spec",
 	Features: []features.FeatureName{
 		features.SupportGateway,
 		features.SupportHTTPRoute,
 		features.SupportBackendTLSPolicy,
 	},
 	Manifests: []string{"tests/backendtlspolicy-observed-generation-bump.yaml"},
-	Test: func(t *testing.T, suite *suite.ConformanceTestSuite) {
-		ns := "gateway-conformance-infra"
+	Test: func(t *testing.T, suite *suitepkg.ConformanceTestSuite) {
+		ns := suitepkg.InfrastructureNamespace
 		policyNN := types.NamespacedName{Name: "observed-generation-bump", Namespace: ns}
 		gwNN := types.NamespacedName{Name: "same-namespace", Namespace: ns}
 
@@ -55,7 +55,7 @@ var BackendTLSPolicyObservedGenerationBump = suite.ConformanceTest{
 			ctx, cancel := context.WithTimeout(context.Background(), suite.TimeoutConfig.LatestObservedGenerationSet)
 			defer cancel()
 
-			namespaces := []string{"gateway-conformance-infra"}
+			namespaces := []string{suitepkg.InfrastructureNamespace}
 			kubernetes.NamespacesMustBeReady(t, suite.Client, suite.TimeoutConfig, namespaces)
 
 			original := &gatewayv1.BackendTLSPolicy{}

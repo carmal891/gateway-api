@@ -25,7 +25,7 @@ import (
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 	h "sigs.k8s.io/gateway-api/conformance/utils/http"
 	"sigs.k8s.io/gateway-api/conformance/utils/kubernetes"
-	"sigs.k8s.io/gateway-api/conformance/utils/suite"
+	suitepkg "sigs.k8s.io/gateway-api/conformance/utils/suite"
 	"sigs.k8s.io/gateway-api/pkg/features"
 )
 
@@ -33,7 +33,7 @@ func init() {
 	ConformanceTests = append(ConformanceTests, BackendTLSPolicyConflictResolution)
 }
 
-var BackendTLSPolicyConflictResolution = suite.ConformanceTest{
+var BackendTLSPolicyConflictResolution = suitepkg.ConformanceTest{
 	ShortName:   "BackendTLSPolicyConflictResolution",
 	Description: "Verifies that when multiple BackendTLSPolicies target the same Service, only one policy is accepted while conflicting policies are rejected, and traffic continues to route successfully.",
 	Features: []features.FeatureName{
@@ -42,14 +42,14 @@ var BackendTLSPolicyConflictResolution = suite.ConformanceTest{
 		features.SupportBackendTLSPolicy,
 	},
 	Manifests: []string{"tests/backendtlspolicy-conflict-resolution.yaml"},
-	Test: func(t *testing.T, suite *suite.ConformanceTestSuite) {
-		ns := "gateway-conformance-infra"
+	Test: func(t *testing.T, cts *suitepkg.ConformanceTestSuite) {
+		ns := suitepkg.InfrastructureNamespace
 		routeNN := types.NamespacedName{Name: "backendtlspolicy-conflict-resolution", Namespace: ns}
 		gwNN := types.NamespacedName{Name: "same-namespace", Namespace: ns}
 
-		kubernetes.NamespacesMustBeReady(t, suite.Client, suite.TimeoutConfig, []string{ns})
-		gwAddr := kubernetes.GatewayAndRoutesMustBeAccepted(t, suite.Client, suite.TimeoutConfig, suite.ControllerName, kubernetes.NewGatewayRef(gwNN), &gatewayv1.HTTPRoute{}, false, routeNN)
-		kubernetes.HTTPRouteMustHaveResolvedRefsConditionsTrue(t, suite.Client, suite.TimeoutConfig, routeNN, gwNN)
+		kubernetes.NamespacesMustBeReady(t, cts.Client, cts.TimeoutConfig, []string{ns})
+		gwAddr := kubernetes.GatewayAndRoutesMustBeAccepted(t, cts.Client, cts.TimeoutConfig, cts.ControllerName, kubernetes.NewGatewayRef(gwNN), &gatewayv1.HTTPRoute{}, false, routeNN)
+		kubernetes.HTTPRouteMustHaveResolvedRefsConditionsTrue(t, cts.Client, cts.TimeoutConfig, routeNN, gwNN)
 
 		acceptedCond := metav1.Condition{
 			Type:   string(gatewayv1.PolicyConditionAccepted),
@@ -65,17 +65,17 @@ var BackendTLSPolicyConflictResolution = suite.ConformanceTest{
 		t.Run("Conflicting BackendTLSPolicies targeting the same Service without a section name", func(t *testing.T) {
 			t.Run("First BackendTLSPolicy should be accepted", func(t *testing.T) {
 				policyNN := types.NamespacedName{Name: "conflicted-without-section-name-1", Namespace: ns}
-				kubernetes.BackendTLSPolicyMustHaveCondition(t, suite.Client, suite.TimeoutConfig, policyNN, gwNN, acceptedCond)
+				kubernetes.BackendTLSPolicyMustHaveCondition(t, cts.Client, cts.TimeoutConfig, policyNN, gwNN, acceptedCond)
 			})
 
 			t.Run("Second BackendTLSPolicy should have a false Accepted condition with reason Conflicted ", func(t *testing.T) {
 				// This is not specific to BackendTLSPolicy, it follows the conflict-resolution rules, as defined in GEP-713.
 				conflictedPolicyNN := types.NamespacedName{Name: "conflicted-without-section-name-2", Namespace: ns}
-				kubernetes.BackendTLSPolicyMustHaveCondition(t, suite.Client, suite.TimeoutConfig, conflictedPolicyNN, gwNN, conflictedCond)
+				kubernetes.BackendTLSPolicyMustHaveCondition(t, cts.Client, cts.TimeoutConfig, conflictedPolicyNN, gwNN, conflictedCond)
 			})
 
 			t.Run("HTTP request sent to Service using the accepted BackendTLSPolicy should succeed", func(t *testing.T) {
-				h.MakeRequestAndExpectEventuallyConsistentResponse(t, suite.RoundTripper, suite.TimeoutConfig, gwAddr,
+				h.MakeRequestAndExpectEventuallyConsistentResponse(t, cts.RoundTripper, cts.TimeoutConfig, gwAddr,
 					h.ExpectedResponse{
 						Namespace: ns,
 						Request: h.Request{
@@ -91,17 +91,17 @@ var BackendTLSPolicyConflictResolution = suite.ConformanceTest{
 		t.Run("Conflicting BackendTLSPolicies targeting the same Service with the same section name", func(t *testing.T) {
 			t.Run("First BackendTLSPolicy should be accepted", func(t *testing.T) {
 				policyNN := types.NamespacedName{Name: "conflicted-with-section-name-1", Namespace: ns}
-				kubernetes.BackendTLSPolicyMustHaveCondition(t, suite.Client, suite.TimeoutConfig, policyNN, gwNN, acceptedCond)
+				kubernetes.BackendTLSPolicyMustHaveCondition(t, cts.Client, cts.TimeoutConfig, policyNN, gwNN, acceptedCond)
 			})
 
 			t.Run("Second BackendTLSPolicy should have a false Accepted condition with reason Conflicted ", func(t *testing.T) {
 				// This is not specific to BackendTLSPolicy, it follows the conflict-resolution rules, as defined in GEP-713.
 				conflictedPolicyNN := types.NamespacedName{Name: "conflicted-with-section-name-2", Namespace: ns}
-				kubernetes.BackendTLSPolicyMustHaveCondition(t, suite.Client, suite.TimeoutConfig, conflictedPolicyNN, gwNN, conflictedCond)
+				kubernetes.BackendTLSPolicyMustHaveCondition(t, cts.Client, cts.TimeoutConfig, conflictedPolicyNN, gwNN, conflictedCond)
 			})
 
 			t.Run("HTTP request sent to Service using the accepted BackendTLSPolicy should succeed", func(t *testing.T) {
-				h.MakeRequestAndExpectEventuallyConsistentResponse(t, suite.RoundTripper, suite.TimeoutConfig, gwAddr,
+				h.MakeRequestAndExpectEventuallyConsistentResponse(t, cts.RoundTripper, cts.TimeoutConfig, gwAddr,
 					h.ExpectedResponse{
 						Namespace: ns,
 						Request: h.Request{
@@ -117,16 +117,16 @@ var BackendTLSPolicyConflictResolution = suite.ConformanceTest{
 		t.Run("BackendTLSPolicies targeting the same Service with and without a section name", func(t *testing.T) {
 			t.Run("BackendTLSPolicy with section name should be accepted", func(t *testing.T) {
 				policyNN := types.NamespacedName{Name: "not-conflicted-with-section-name", Namespace: ns}
-				kubernetes.BackendTLSPolicyMustHaveCondition(t, suite.Client, suite.TimeoutConfig, policyNN, gwNN, acceptedCond)
+				kubernetes.BackendTLSPolicyMustHaveCondition(t, cts.Client, cts.TimeoutConfig, policyNN, gwNN, acceptedCond)
 			})
 
 			t.Run("BackendTLSPolicy without section name should be accepted", func(t *testing.T) {
 				policyNN := types.NamespacedName{Name: "not-conflicted-without-section-name", Namespace: ns}
-				kubernetes.BackendTLSPolicyMustHaveCondition(t, suite.Client, suite.TimeoutConfig, policyNN, gwNN, acceptedCond)
+				kubernetes.BackendTLSPolicyMustHaveCondition(t, cts.Client, cts.TimeoutConfig, policyNN, gwNN, acceptedCond)
 			})
 
 			t.Run("HTTP request sent to Service using the BackendTLSPolicy with section name should succeed", func(t *testing.T) {
-				h.MakeRequestAndExpectEventuallyConsistentResponse(t, suite.RoundTripper, suite.TimeoutConfig, gwAddr,
+				h.MakeRequestAndExpectEventuallyConsistentResponse(t, cts.RoundTripper, cts.TimeoutConfig, gwAddr,
 					h.ExpectedResponse{
 						Namespace: ns,
 						Request: h.Request{
@@ -138,7 +138,7 @@ var BackendTLSPolicyConflictResolution = suite.ConformanceTest{
 					})
 			})
 			t.Run("HTTP request sent to Service using the BackendTLSPolicy without section name should succeed", func(t *testing.T) {
-				h.MakeRequestAndExpectEventuallyConsistentResponse(t, suite.RoundTripper, suite.TimeoutConfig, gwAddr,
+				h.MakeRequestAndExpectEventuallyConsistentResponse(t, cts.RoundTripper, cts.TimeoutConfig, gwAddr,
 					h.ExpectedResponse{
 						Namespace: ns,
 						Request: h.Request{
